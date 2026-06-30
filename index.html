@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShortSpire | Elegant & Portable URL Shortener</title>
+  <meta name="description" content="A premium, client-side URL shortener. Create secure local custom aliases or portable compressed links that work anywhere instantly.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Styling -->
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <!-- Background Decorative Glowing Blobs -->
+  <div class="glow-bg">
+    <div class="blob blob-purple"></div>
+    <div class="blob blob-cyan"></div>
+  </div>
+
+  <!-- Redirection Screen (Initially Hidden) -->
+  <div id="redirection-screen" class="redirection-container hidden">
+    <div class="redirect-card glass">
+      <div class="redirect-header">
+        <div class="brand-logo mini">
+          <span class="gradient-text">ShortSpire</span>
+        </div>
+        <div class="redirect-status">Preparing redirection...</div>
+      </div>
+      
+      <!-- Circular Progress Countdown -->
+      <div class="countdown-circle">
+        <svg class="progress-ring" width="160" height="160">
+          <circle class="progress-ring-bg" stroke="rgba(255, 255, 255, 0.05)" stroke-width="8" fill="transparent" r="70" cx="80" cy="80" />
+          <circle id="progress-indicator" class="progress-ring-bar" stroke="url(#cyan-purple-grad)" stroke-width="8" fill="transparent" r="70" cx="80" cy="80" stroke-linecap="round" />
+          <defs>
+            <linearGradient id="cyan-purple-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#06b6d4" />
+              <stop offset="100%" stop-color="#a855f7" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <div id="countdown-number" class="countdown-value">3</div>
+      </div>
+
+      <div class="redirect-details">
+        <p class="redirect-label">You are navigating to:</p>
+        <div id="redirect-url-preview" class="url-preview-box">
+          <i class="fa-solid fa-link"></i>
+          <span id="redirect-target-text">https://example.com/very/long/url/path</span>
+        </div>
+        <p class="redirect-security-note">
+          <i class="fa-solid fa-shield-halved"></i> Always verify the destination domain before proceeding.
+        </p>
+      </div>
+
+      <div class="redirect-actions">
+        <button id="btn-cancel-redirect" class="btn btn-secondary">
+          <i class="fa-solid fa-xmark"></i> Cancel & Open Dashboard
+        </button>
+        <button id="btn-force-redirect" class="btn btn-primary">
+          Redirect Now <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App Layout -->
+  <div id="main-app" class="app-layout">
+    
+    <!-- Top Header -->
+    <header class="main-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-bolt-lightning"></i>
+        </div>
+        <div class="brand-text">
+          <h1>Short<span class="gradient-text">Spire</span></h1>
+          <span class="badge-tag">Client-Powered</span>
+        </div>
+      </div>
+      <p class="brand-tagline">Elegant URL shortener with local database & zero-database portable sharing.</p>
+    </header>
+
+    <!-- Shortener Controls Grid -->
+    <main class="dashboard-grid">
+      
+      <!-- Shortener Box (Glass Panel) -->
+      <section class="panel-card glass shorten-panel">
+        <h2 class="section-title">
+          <span class="icon-glow"><i class="fa-solid fa-link-slash"></i></span>
+          Shorten a URL
+        </h2>
+        
+        <form id="shorten-form" class="shorten-form">
+          <div class="input-wrapper">
+            <label for="long-url" class="field-label">Destination URL</label>
+            <div class="url-input-container">
+              <i class="fa-solid fa-globe input-icon"></i>
+              <input type="url" id="long-url" placeholder="https://example.com/very-long-url-path-to-shorten" required autocomplete="off">
+              <button type="button" id="btn-paste" class="btn-paste-shortcut" title="Paste from Clipboard">
+                <i class="fa-solid fa-paste"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Configuration Tabs -->
+          <div class="config-tabs-container">
+            <span class="field-label">Shortener Mode</span>
+            <div class="config-tabs">
+              <button type="button" class="tab-btn active" data-mode="portable">
+                <i class="fa-solid fa-share-nodes"></i>
+                <div class="tab-label-group">
+                  <span class="tab-title">Portable Shareable</span>
+                  <span class="tab-desc">Encodes link in hash. Shareable anywhere.</span>
+                </div>
+              </button>
+              
+              <button type="button" class="tab-btn" data-mode="local">
+                <i class="fa-solid fa-database"></i>
+                <div class="tab-label-group">
+                  <span class="tab-title">Local Alias</span>
+                  <span class="tab-desc">Saves locally. Supports custom words.</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Extra Options for Local Link (Only shown when local tab active) -->
+          <div id="local-options-container" class="options-drawer hidden">
+            <div class="input-wrapper animate-slide-down">
+              <label for="custom-alias" class="field-label">Custom Alias <span class="optional">(Optional)</span></label>
+              <div class="alias-input-container">
+                <span class="alias-prefix">short.spire/#s/</span>
+                <input type="text" id="custom-alias" placeholder="my-awesome-link" maxlength="30" pattern="^[a-zA-Z0-9-_]+$" title="Only letters, numbers, hyphens, and underscores allowed">
+              </div>
+              <span class="field-help">If empty, a random short code will be generated.</span>
+            </div>
+          </div>
+
+          <button type="submit" id="btn-shorten" class="btn btn-primary btn-block">
+            <span>Shorten Link</span> <i class="fa-solid fa-circle-arrow-right"></i>
+          </button>
+        </form>
+
+        <!-- Result Box (Hidden by default) -->
+        <div id="result-box" class="result-box hidden">
+          <div class="result-divider"></div>
+          <div class="result-content animate-fade-in">
+            <div class="result-label-row">
+              <span class="result-success-badge"><i class="fa-solid fa-circle-check"></i> Link Shortened!</span>
+              <span id="result-type-badge" class="badge-outline">Portable</span>
+            </div>
+            
+            <div class="short-url-display-container">
+              <input type="text" id="shortened-url-text" readonly>
+              <button id="btn-copy" class="btn btn-primary btn-icon-only" title="Copy shortened URL">
+                <i class="fa-solid fa-copy"></i>
+              </button>
+              <button id="btn-qr" class="btn btn-secondary btn-icon-only" title="View QR Code">
+                <i class="fa-solid fa-qrcode"></i>
+              </button>
+            </div>
+            
+            <div class="result-footer">
+              <span class="original-url-label">Redirects to:</span>
+              <a href="#" id="result-original-link" target="_blank" class="original-url-preview">
+                https://example.com/very-long-url-path-to-shorten <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- History and Analytics Panel (Right/Bottom) -->
+      <section class="panel-card glass history-panel">
+        <div class="history-header">
+          <h2 class="section-title">
+            <span class="icon-glow"><i class="fa-solid fa-clock-rotate-left"></i></span>
+            Link Vault
+          </h2>
+          <span id="history-count" class="counter-badge">0 Links</span>
+        </div>
+
+        <div class="history-controls">
+          <div class="search-wrapper">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="search-history" placeholder="Search link destination or alias...">
+          </div>
+          <button id="btn-clear-history" class="btn btn-danger-outline" title="Clear all local links">
+            <i class="fa-solid fa-trash-can"></i> Clear Vault
+          </button>
+        </div>
+
+        <!-- History Content Container -->
+        <div class="history-list-wrapper">
+          <!-- Empty State -->
+          <div id="history-empty-state" class="empty-state">
+            <div class="empty-icon-container">
+              <i class="fa-solid fa-folder-open"></i>
+            </div>
+            <h3>Your Vault is Empty</h3>
+            <p>Shorten a URL to save it to your local browser storage for easy access, custom aliases, and clicks tracking.</p>
+          </div>
+
+          <!-- Links Table (hidden when empty) -->
+          <div id="history-table-container" class="table-responsive hidden">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Link Details</th>
+                  <th class="col-type">Type</th>
+                  <th class="col-clicks">Clicks</th>
+                  <th class="col-actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="history-table-body">
+                <!-- Javascript will inject list rows here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-links">
+        <a href="#" id="btn-show-about"><i class="fa-solid fa-circle-info"></i> How it works</a>
+        <span class="separator">•</span>
+        <a href="https://github.com" target="_blank"><i class="fa-brands fa-github"></i> Source</a>
+      </div>
+      <p class="copyright">&copy; 2026 ShortSpire. Run locally, share globally.</p>
+    </footer>
+  </div>
+
+  <!-- QR Code Modal (Initially Hidden) -->
+  <div id="qr-modal" class="modal-overlay hidden">
+    <div class="modal-container glass animate-zoom-in">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-qrcode"></i> QR Code</h3>
+        <button id="btn-close-qr" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="qr-container-box">
+          <img id="qr-image" src="" alt="Shortened URL QR Code">
+        </div>
+        <p class="qr-info-text">Scan code with a mobile device to navigate to the destination link.</p>
+        <div class="qr-url-box">
+          <span id="qr-url-text">https://short.spire/#c/12345</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-download-qr" class="btn btn-primary btn-block">
+          <i class="fa-solid fa-download"></i> Save QR Code
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- About / Help Modal (Initially Hidden) -->
+  <div id="about-modal" class="modal-overlay hidden">
+    <div class="modal-container glass animate-zoom-in">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-circle-question"></i> How ShortSpire Works</h3>
+        <button id="btn-close-about" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body scrollable-body">
+        <h4>Overview</h4>
+        <p>ShortSpire is a serverless, database-free client-side URL shortener. It runs completely inside your web browser and offers two high-performance shortening methods.</p>
+        
+        <div class="info-blocks">
+          <div class="info-item">
+            <div class="info-icon purple"><i class="fa-solid fa-share-nodes"></i></div>
+            <div class="info-text">
+              <h5>Portable Shareable Mode</h5>
+              <p>Compresses and encodes the original URL directly into a URL hash (using base64url serialization). Because the destination URL is stored inside the link itself, you can share this short link with anyone, and it will work immediately on their machine without needing any server database!</p>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-icon cyan"><i class="fa-solid fa-database"></i></div>
+            <div class="info-text">
+              <h5>Local Database Mode</h5>
+              <p>Generates a shorter 6-character random code (or lets you specify a custom alias word, e.g. <code>#s/work</code>) and maps it to the target URL inside your browser's local storage. This database remains private on your machine and supports tracking click counts.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="security-banner">
+          <i class="fa-solid fa-shield-halved"></i>
+          <div>
+            <h5>Privacy First</h5>
+            <p>We do not store your links on external servers. All operations happen client-side in sandbox memory. Your browser vault keeps your local database perfectly secure.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-close-about-ok" class="btn btn-primary btn-block">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Script -->
+  <script src="app.js"></script>
+</body>
+</html>
