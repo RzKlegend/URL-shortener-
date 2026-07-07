@@ -9,6 +9,7 @@ const DB_PATH = path.join(__dirname, 'data', 'links.json');
 if (!fs.existsSync(path.dirname(DB_PATH))) fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 if (!fs.existsSync(DB_PATH)) fs.writeFileSync(DB_PATH, '[]');
 
+app.set('trust proxy', true); // Trust the reverse proxy (like Replit) to get the real visitor IP
 app.use(express.static(__dirname));
 app.use(bodyParser.json());
 
