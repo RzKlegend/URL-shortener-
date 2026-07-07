@@ -1,0 +1,25 @@
+{
+  "name": "url-shortener-",
+  "version": "1.0.0",
+  "description": "ShortSpire is a premium, client-powered URL shortener built with HTML, CSS, and vanilla JavaScript. It runs entirely in the browser and requires no server-side database. It features two modes of operation:\r 1. **Portable Mode (Zero-Database)**: Encodes and compresses URLs directly into the URL hash, making the shortened link completely portable and self-contained. Anyone who clicks the link will be automatically redirected by the client code without needing a database lookup.\r 2. **Local Database Mode**: Allows creating custom, readable aliases for your links. The mapping is stored locally in your browser's `localStorage` and keeps track of click analytics.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RzKlegend/URL-shortener-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/RzKlegend/URL-shortener-/issues"
+  },
+  "homepage": "https://github.com/RzKlegend/URL-shortener-#readme",
+  "dependencies": {
+    "body-parser": "^2.3.0",
+    "express": "^5.2.1"
+  }
+}
