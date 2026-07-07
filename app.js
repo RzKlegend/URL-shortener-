@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   // --- STATE ---
   let selectedMode = 'portable'; // 'portable' or 'local'
-  let linksDatabase = JSON.parse(localStorage.getItem('shortspire_links')) || [];
   let redirectTimer = null;
   let qrCodeUrl = '';
 
@@ -50,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- INITIALIZATION ---
   checkHashRedirection();
-  renderHistory();
 
   // --- REDIRECTION LOGIC ---
   function checkHashRedirection() {
@@ -70,17 +68,18 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (hash.startsWith('#s/')) {
       // Stored link
       const code = hash.substring(3);
-      const linkRecord = linksDatabase.find(link => link.shortCode === code);
-      if (linkRecord) {
-        // Increment click counter
-        linkRecord.clicks = (linkRecord.clicks || 0) + 1;
-        saveDatabase();
-        renderHistory();
-        startRedirection(linkRecord.originalUrl);
-      } else {
-        showToast('Short link not found or expired', 'error');
-        cleanHash();
-      }
+      fetch(`/api/link/${code}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Not found');
+          return res.json();
+        })
+        .then(data => {
+          startRedirection(data.originalUrl);
+        })
+        .catch(err => {
+          showToast('Short link not found or expired', 'error');
+          cleanHash();
+        });
     }
   }
 
@@ -199,116 +198,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- VAULT / DATABASE MANAGEMENT ---
-  function saveDatabase() {
-    localStorage.setItem('shortspire_links', JSON.stringify(linksDatabase));
-  }
-
-  function addLinkToVault(originalUrl, shortUrl, type, shortCode) {
-    // Remove if existing matches code (overwrite)
-    linksDatabase = linksDatabase.filter(link => link.shortCode !== shortCode);
-    
-    linksDatabase.unshift({
-      id: Date.now().toString(),
-      originalUrl,
-      shortUrl,
-      type,
-      shortCode,
-      clicks: 0,
-      date: new Date().toISOString()
-    });
-    
-    saveDatabase();
-    renderHistory();
-  }
-
-  // --- RENDER FUNCTIONS ---
-  function renderHistory(filterText = '') {
-    const filtered = linksDatabase.filter(link => {
-      const matchSearch = link.originalUrl.toLowerCase().includes(filterText.toLowerCase()) || 
-                          link.shortCode.toLowerCase().includes(filterText.toLowerCase());
-      return matchSearch;
-    });
-
-    historyCount.textContent = `${linksDatabase.length} Link${linksDatabase.length === 1 ? '' : 's'}`;
-
-    if (linksDatabase.length === 0) {
-      historyEmptyState.classList.remove('hidden');
-      historyTableContainer.classList.add('hidden');
-      return;
-    }
-
-    historyEmptyState.classList.add('hidden');
-    historyTableContainer.classList.remove('hidden');
-    historyTableBody.innerHTML = '';
-
-    filtered.forEach(link => {
-      const tr = document.createElement('tr');
-      
-      const formattedDate = new Date(link.date).toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      });
-
-      tr.innerHTML = `
-        <td>
-          <div class="link-details-cell">
-            <a href="${link.shortUrl}" target="_blank" class="row-short-url">${link.shortUrl}</a>
-            <a href="${link.originalUrl}" target="_blank" class="row-original-url" title="${link.originalUrl}">${link.originalUrl}</a>
-          </div>
-        </td>
-        <td class="col-type">
-          <span class="type-badge ${link.type}">${link.type}</span>
-        </td>
-        <td class="col-clicks">
-          <div class="clicks-indicator">
-            <i class="fa-solid fa-chart-simple"></i>
-            <span>${link.clicks || 0}</span>
-          </div>
-        </td>
-        <td class="col-actions">
-          <div class="row-actions-container">
-            <button class="btn-action btn-copy-row" data-url="${link.shortUrl}" title="Copy short URL">
-              <i class="fa-solid fa-copy"></i>
-            </button>
-            <button class="btn-action btn-qr-row" data-url="${link.shortUrl}" title="Generate QR Code">
-              <i class="fa-solid fa-qrcode"></i>
-            </button>
-            <button class="btn-action btn-delete" data-id="${link.id}" title="Remove link">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          </div>
-        </td>
-      `;
-
-      historyTableBody.appendChild(tr);
-    });
-
-    // Wire up events for items in table
-    document.querySelectorAll('.btn-copy-row').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const url = btn.getAttribute('data-url');
-        copyToClipboard(url, btn);
-      });
-    });
-
-    document.querySelectorAll('.btn-qr-row').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const url = btn.getAttribute('data-url');
-        openQrModal(url);
-      });
-    });
-
-    document.querySelectorAll('.btn-delete').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.getAttribute('data-id');
-        deleteLink(id);
-      });
-    });
-  }
+  // (Moved to admin.js)
 
   // --- ACTIONS ---
-  function handleShorten(e) {
+  async function handleShorten(e) {
     e.preventDefault();
     let url = longUrlInput.value.trim();
 
@@ -324,60 +217,59 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selectedMode === 'portable') {
       shortCode = encodePortable(url);
       shortUrl = `${currentOrigin}#c/${shortCode}`;
-      addLinkToVault(url, shortUrl, 'portable', shortCode);
+      
+      // Save portable link to backend too, so admin sees it
+      try {
+        await fetch('/api/shorten', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, mode: 'portable', alias: shortCode })
+        });
+      } catch(err) { console.error(err); }
+
+      displayResults(url, shortUrl);
     } else {
       // Local Alias Mode
       let alias = customAliasInput.value.trim().toLowerCase();
       
-      if (alias) {
-        // Validate alias format
-        if (!/^[a-z0-9-_]+$/.test(alias)) {
-          showToast('Alias must contain only letters, numbers, dashes, and underscores', 'error');
-          return;
-        }
-        // Collision check
-        const existing = linksDatabase.find(link => link.shortCode === alias && link.type === 'local');
-        if (existing) {
-          showToast(`The custom alias "${alias}" is already in use`, 'error');
-          return;
-        }
-        shortCode = alias;
-      } else {
-        shortCode = generateShortCode();
+      if (alias && !/^[a-z0-9-_]+$/.test(alias)) {
+        showToast('Alias must contain only letters, numbers, dashes, and underscores', 'error');
+        return;
       }
       
-      shortUrl = `${currentOrigin}#s/${shortCode}`;
-      addLinkToVault(url, shortUrl, 'local', shortCode);
+      try {
+        const res = await fetch('/api/shorten', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, mode: 'local', alias })
+        });
+        const data = await res.json();
+        
+        if (!res.ok) {
+          showToast(data.error || 'Failed to shorten', 'error');
+          return;
+        }
+        displayResults(url, data.shortUrl);
+      } catch(err) {
+        showToast('Network error while shortening link', 'error');
+        return;
+      }
     }
+  }
 
-    // Display Results
+  function displayResults(originalUrl, shortUrl) {
     resultTypeBadge.textContent = selectedMode === 'portable' ? 'Portable' : 'Local Alias';
     resultTypeBadge.className = `badge-outline ${selectedMode}`;
     shortenedUrlText.value = shortUrl;
-    resultOriginalLink.href = url;
-    resultOriginalLink.textContent = url;
+    resultOriginalLink.href = originalUrl;
+    resultOriginalLink.textContent = originalUrl;
     resultBox.classList.remove('hidden');
     resultBox.scrollIntoView({ behavior: 'smooth' });
 
     showToast('Shortened link generated successfully!', 'success');
   }
 
-  function deleteLink(id) {
-    linksDatabase = linksDatabase.filter(link => link.id !== id);
-    saveDatabase();
-    renderHistory(searchHistory.value);
-    showToast('Link removed from vault', 'info');
-  }
 
-  function clearVault() {
-    if (confirm('Are you sure you want to clear your local link vault? This will delete all custom aliases and analytics.')) {
-      linksDatabase = [];
-      saveDatabase();
-      renderHistory();
-      resultBox.classList.add('hidden');
-      showToast('Link vault cleared', 'info');
-    }
-  }
 
   function copyToClipboard(text, triggerBtn) {
     navigator.clipboard.writeText(text).then(() => {

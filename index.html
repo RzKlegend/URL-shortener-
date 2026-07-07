@@ -179,55 +179,7 @@
         </div>
       </section>
 
-      <!-- History and Analytics Panel (Right/Bottom) -->
-      <section class="panel-card glass history-panel">
-        <div class="history-header">
-          <h2 class="section-title">
-            <span class="icon-glow"><i class="fa-solid fa-clock-rotate-left"></i></span>
-            Link Vault
-          </h2>
-          <span id="history-count" class="counter-badge">0 Links</span>
-        </div>
-
-        <div class="history-controls">
-          <div class="search-wrapper">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="search-history" placeholder="Search link destination or alias...">
-          </div>
-          <button id="btn-clear-history" class="btn btn-danger-outline" title="Clear all local links">
-            <i class="fa-solid fa-trash-can"></i> Clear Vault
-          </button>
-        </div>
-
-        <!-- History Content Container -->
-        <div class="history-list-wrapper">
-          <!-- Empty State -->
-          <div id="history-empty-state" class="empty-state">
-            <div class="empty-icon-container">
-              <i class="fa-solid fa-folder-open"></i>
-            </div>
-            <h3>Your Vault is Empty</h3>
-            <p>Shorten a URL to save it to your local browser storage for easy access, custom aliases, and clicks tracking.</p>
-          </div>
-
-          <!-- Links Table (hidden when empty) -->
-          <div id="history-table-container" class="table-responsive hidden">
-            <table class="history-table">
-              <thead>
-                <tr>
-                  <th>Link Details</th>
-                  <th class="col-type">Type</th>
-                  <th class="col-clicks">Clicks</th>
-                  <th class="col-actions">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="history-table-body">
-                <!-- Javascript will inject list rows here -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+      <!-- History and Analytics Panel (Removed for admin only) -->
 
     </main>
 
@@ -237,6 +189,8 @@
         <a href="#" id="btn-show-about"><i class="fa-solid fa-circle-info"></i> How it works</a>
         <span class="separator">•</span>
         <a href="https://github.com" target="_blank"><i class="fa-brands fa-github"></i> Source</a>
+        <span class="separator">•</span>
+        <a href="admin.html" id="btn-admin-panel"><i class="fa-solid fa-lock"></i> Admin Vault</a>
       </div>
       <p class="copyright">&copy; 2026 ShortSpire. Run locally, share globally.</p>
     </footer>
