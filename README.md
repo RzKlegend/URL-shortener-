@@ -1,10 +1,10 @@
-# ShortSpire ⚡
+# ShortSpire
 
 ShortSpire is a premium, client-powered URL shortener built with HTML, CSS, and vanilla JavaScript. It runs entirely in the browser and requires no server-side database. It features two modes of operation:
 1. **Portable Mode (Zero-Database)**: Encodes and compresses URLs directly into the URL hash, making the shortened link completely portable and self-contained. Anyone who clicks the link will be automatically redirected by the client code without needing a database lookup.
 2. **Local Database Mode**: Allows creating custom, readable aliases for your links. The mapping is stored locally in your browser's `localStorage` and keeps track of click analytics.
 
-## ✨ Features
+## Features
 
 - **Beautiful Glassmorphic UI**: Elegant dark mode design with vibrant glowing backgrounds, smooth transitions, and responsive layouts.
 - **Two Shortening Modes**: Choose between database-free portable links or readable local aliases.
@@ -13,7 +13,7 @@ ShortSpire is a premium, client-powered URL shortener built with HTML, CSS, and 
 - **Built-in QR Code Generator**: Generate and download QR codes for your shortened links instantly.
 - **Deploy Ready**: Fully compatible with static hosting options like **GitHub Pages**, Vercel, Netlify, or self-hosting.
 
-## 🚀 How to Run Locally
+## How to Run Locally
 
 Since ShortSpire is built entirely as a static client-side web application, you do not need to install any heavy dependencies (like Node.js, Python, etc.) to run it.
 
@@ -27,7 +27,7 @@ npx serve .
 ```
 Or, if you use VS Code, you can use the **Live Server** extension.
 
-## 📦 Deployment to GitHub Pages
+## Deployment to GitHub Pages
 
 ShortSpire is designed to be hosted for free on GitHub Pages! 
 
