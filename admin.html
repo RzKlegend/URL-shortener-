@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShortSpire | Admin Vault</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="index.css">
+  
+  <style>
+    .admin-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    
+    .login-container {
+      max-width: 400px;
+      margin: 100px auto;
+      text-align: center;
+    }
+    
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    .admin-table th, .admin-table td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+    
+    .meta-data {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-bg">
+    <div class="blob blob-purple"></div>
+    <div class="blob blob-cyan"></div>
+  </div>
+
+  <div id="login-view" class="login-container glass">
+    <h2>Admin Login</h2>
+    <input type="password" id="admin-password" placeholder="Enter password" class="form-input" style="width: 100%; margin: 20px 0;">
+    <button id="btn-login" class="btn btn-primary btn-block">Login</button>
+  </div>
+
+  <div id="admin-view" class="admin-container glass hidden">
+    <div class="top-bar">
+      <h2><i class="fa-solid fa-shield-halved"></i> Cyber-Security Link Vault</h2>
+      <div>
+        <a href="index.html" class="btn btn-secondary">Back to App</a>
+        <button id="btn-logout" class="btn btn-danger-outline">Logout</button>
+      </div>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Link Details</th>
+            <th>Type</th>
+            <th>Clicks</th>
+            <th>Metadata (IP & Client)</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="admin-table-body">
+          <!-- Rows injected via JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <script src="admin.js"></script>
+</body>
+</html>
