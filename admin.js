@@ -57,13 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const tr = document.createElement('tr');
       const date = new Date(link.date).toLocaleString();
       const ip = link.ip || 'Unknown';
-      const cellId = `geo-${link.id}`;
-      
-      // Build a Google Maps search link for the IP
-      const isLocalIp = (ip === '::1' || ip === '127.0.0.1' || ip.includes('127.0.0.1') || ip === 'localhost');
-      const ipDisplay = isLocalIp
-        ? `<span title="Localhost">${ip}</span>`
-        : `<a href="https://www.google.com/maps/search/${encodeURIComponent(ip)}" target="_blank" style="color: var(--secondary); text-decoration: none;" title="Search IP on Google Maps">${ip} <i class="fa-solid fa-location-dot" style="font-size:0.7rem"></i></a>`;
+      const geoId = `geo-${link.id}`;
+      const ipId = `ip-${link.id}`;
 
       tr.innerHTML = `
         <td>
@@ -74,24 +69,25 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${link.clicks || 0}</td>
         <td>
           <div class="meta-data">
-            <strong>IP:</strong> ${ipDisplay}<br>
-            <strong>Location:</strong> <span id="${cellId}">Loading...</span><br>
+            <strong>IP:</strong> <span id="${ipId}">${ip}</span><br>
+            <strong>Location:</strong> <span id="${geoId}">Loading...</span><br>
             <strong>UA:</strong> ${link.userAgent || 'Unknown'}
           </div>
         </td>
         <td><span class="meta-data">${date}</span></td>
       `;
       tableBody.appendChild(tr);
-      resolveGeolocation(ip, cellId);
+      resolveGeolocation(ip, geoId, ipId);
     });
   }
 
-  function resolveGeolocation(ip, cellId) {
-    const el = document.getElementById(cellId);
-    if (!el) return;
+  function resolveGeolocation(ip, geoId, ipId) {
+    const geoEl = document.getElementById(geoId);
+    const ipEl = document.getElementById(ipId);
+    if (!geoEl) return;
     
     if (ip === '::1' || ip === '127.0.0.1' || ip.includes('127.0.0.1') || ip === 'localhost') {
-      el.textContent = 'Localhost (Your Device)';
+      geoEl.textContent = 'Localhost (Your Device)';
       return;
     }
     
@@ -104,20 +100,24 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(res => res.json())
       .then(geo => {
         if (geo.error) {
-          el.textContent = 'Unknown (Lookup failed)';
+          geoEl.textContent = 'Unknown (Lookup failed)';
         } else {
           const locationText = `${geo.city || ''}, ${geo.region || ''}, ${geo.country_name || ''} (${geo.org || 'Unknown ISP'})`;
-          // If lat/lng are available, create a precise Google Maps link
+          // If lat/lng are available, make both IP and Location clickable Google Maps links
           if (geo.latitude && geo.longitude) {
             const mapsUrl = `https://www.google.com/maps/@${geo.latitude},${geo.longitude},14z`;
-            el.innerHTML = `<a href="${mapsUrl}" target="_blank" style="color: var(--secondary); text-decoration: none;" title="View on Google Maps">${locationText} <i class="fa-solid fa-map-location-dot" style="font-size:0.7rem"></i></a>`;
+            geoEl.innerHTML = `<a href="${mapsUrl}" target="_blank" style="color: var(--secondary); text-decoration: none;" title="View on Google Maps">${locationText} <i class="fa-solid fa-map-location-dot" style="font-size:0.7rem"></i></a>`;
+            // Also make the IP address a clickable Maps link using the resolved coordinates
+            if (ipEl) {
+              ipEl.innerHTML = `<a href="${mapsUrl}" target="_blank" style="color: var(--secondary); text-decoration: none;" title="View location of ${cleanIp} on Google Maps">${ip} <i class="fa-solid fa-location-dot" style="font-size:0.7rem"></i></a>`;
+            }
           } else {
-            el.textContent = locationText;
+            geoEl.textContent = locationText;
           }
         }
       })
       .catch(() => {
-        el.textContent = 'Unknown (Network error)';
+        geoEl.textContent = 'Unknown (Network error)';
       });
   }
 });
