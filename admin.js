@@ -59,6 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const ip = link.ip || 'Unknown';
       const cellId = `geo-${link.id}`;
       
+      // Build a Google Maps search link for the IP
+      const isLocalIp = (ip === '::1' || ip === '127.0.0.1' || ip.includes('127.0.0.1') || ip === 'localhost');
+      const ipDisplay = isLocalIp
+        ? `<span title="Localhost">${ip}</span>`
+        : `<a href="https://www.google.com/maps/search/${encodeURIComponent(ip)}" target="_blank" style="color: var(--secondary); text-decoration: none;" title="Search IP on Google Maps">${ip} <i class="fa-solid fa-location-dot" style="font-size:0.7rem"></i></a>`;
+
       tr.innerHTML = `
         <td>
           <a href="${link.shortUrl}" target="_blank">${link.shortUrl}</a><br>
@@ -68,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${link.clicks || 0}</td>
         <td>
           <div class="meta-data">
-            <strong>IP:</strong> ${ip}<br>
+            <strong>IP:</strong> ${ipDisplay}<br>
             <strong>Location:</strong> <span id="${cellId}">Loading...</span><br>
             <strong>UA:</strong> ${link.userAgent || 'Unknown'}
           </div>
@@ -100,7 +106,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (geo.error) {
           el.textContent = 'Unknown (Lookup failed)';
         } else {
-          el.textContent = `${geo.city || ''}, ${geo.region || ''}, ${geo.country_name || ''} (${geo.org || 'Unknown ISP'})`;
+          const locationText = `${geo.city || ''}, ${geo.region || ''}, ${geo.country_name || ''} (${geo.org || 'Unknown ISP'})`;
+          // If lat/lng are available, create a precise Google Maps link
+          if (geo.latitude && geo.longitude) {
+            const mapsUrl = `https://www.google.com/maps/@${geo.latitude},${geo.longitude},14z`;
+            el.innerHTML = `<a href="${mapsUrl}" target="_blank" style="color: var(--secondary); text-decoration: none;" title="View on Google Maps">${locationText} <i class="fa-solid fa-map-location-dot" style="font-size:0.7rem"></i></a>`;
+          } else {
+            el.textContent = locationText;
+          }
         }
       })
       .catch(() => {
