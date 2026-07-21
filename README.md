@@ -3,8 +3,8 @@
 *short note from me:-
      started this project becasuse everytime I wanted to shorten a massive url to a short thing (hence the name) that can be read easily, there were only 1-2 websites online that achieved this but thought of making it myself. I've also made a few changes in the original idea of the projects as follows:-
      1. added a geolocation tracker, that tracks your location based on the url that you paste on the website
-     2. can identify you ip-address
-     3. can identify which device you are using, on which web-browser
+     2. can identify your ip-address
+     3. can identify which device you are using and on which web-browser
      4. what time you accessed the website
      just a few things I wanted to test out along with the original idea (note:- this is in no way used for malicious purposes, just a weekend project for fun)
 
